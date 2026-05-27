@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sushi Kyto — Teziutlán</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=DM+Sans:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink:      #0f0c0a;
+      --paper:    #f5f0e8;
+      --rice:     #faf7f2;
+      --red:      #c0392b;
+      --gold:     #b8973a;
+      --mist:     #ddd8cf;
+      --font-jp:  'Shippori Mincho', serif;
+      --font-body:'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--rice);
+      color: var(--ink);
+      font-family: var(--font-body);
+      font-weight: 300;
+      overflow-x: hidden;
+    }
+
+    /* ── CURSOR ── */
+    body { cursor: none; }
+    #cursor {
+      width: 10px; height: 10px;
+      background: var(--red);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform .15s ease, width .2s, height .2s;
+      mix-blend-mode: multiply;
+    }
+    #cursor.big { width: 40px; height: 40px; transform: translate(-15px,-15px); }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 3rem;
+      background: rgba(245,240,232,.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--mist);
+    }
+    .nav-logo {
+      font-family: var(--font-jp);
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: .05em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--red); }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-size: .78rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: none;
+      opacity: .6;
+      transition: opacity .2s;
+    }
+    .nav-links a:hover { opacity: 1; }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      overflow: hidden;
+    }
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 8rem 4rem 4rem 5rem;
+    }
+    .hero-tag {
+      font-size: .72rem;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 1.8rem;
+      opacity: 0;
+      animation: fadeUp .8s .3s forwards;
+    }
+    .hero-title {
+      font-family: var(--font-jp);
+      font-size: clamp(3rem, 6vw, 5.5rem);
+      font-weight: 800;
+      line-height: 1.05;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp .8s .5s forwards;
+    }
+    .hero-title em {
+      font-style: italic;
+      color: var(--red);
+    }
+    .hero-sub {
+      font-size: 1rem;
+      line-height: 1.75;
+      max-width: 380px;
+      opacity: 0;
+      animation: fadeUp .8s .7s forwards;
+      color: #555;
+    }
+    .hero-cta {
+      margin-top: 2.5rem;
+      display: flex; gap: 1rem;
+      opacity: 0;
+      animation: fadeUp .8s .9s forwards;
+    }
+    .btn {
+      display: inline-block;
+      padding: .85rem 2.2rem;
+      font-family: var(--font-body);
+      font-size: .78rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1.5px solid var(--ink);
+      color: var(--ink);
+      transition: background .25s, color .25s;
+      cursor: none;
+    }
+    .btn:hover { background: var(--ink); color: var(--rice); }
+    .btn.fill { background: var(--red); color: #fff; border-color: var(--red); }
+    .btn.fill:hover { background: #a52d22; border-color: #a52d22; }
+
+    .hero-right {
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      animation: fadeIn 1.2s .4s forwards;
+    }
+    .hero-right::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(245,240,232,.4) 0%, transparent 60%);
+    }
+    .hero-right img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: sepia(15%) contrast(1.05);
+    }
+    .hero-kanji {
+      position: absolute;
+      bottom: 2rem; right: 2rem;
+      font-family: var(--font-jp);
+      font-size: 7rem;
+      font-weight: 800;
+      color: rgba(255,255,255,.15);
+      line-height: 1;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* ── STRIP ── */
+    .strip {
+      background: var(--ink);
+      color: var(--paper);
+      display: flex;
+      align-items: center;
+      padding: .9rem 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .strip-inner {
+      display: inline-flex;
+      gap: 3rem;
+      animation: marquee 18s linear infinite;
+    }
+    .strip-inner span {
+      font-size: .72rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+    .strip-inner .dot { color: var(--red); }
+
+    /* ── SECTIONS SHARED ── */
+    section { padding: 7rem 5rem; }
+    .section-label {
+      font-size: .68rem;
+      letter-spacing: .3em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: var(--font-jp);
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── ABOUT ── */
+    #nosotros {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: center;
+      background: var(--paper);
+    }
+    .about-img {
+      position: relative;
+      aspect-ratio: 4/5;
+      overflow: hidden;
+    }
+    .about-img img { width: 100%; height: 100%; object-fit: cover; }
+    .about-img::before {
+      content: '';
+      position: absolute;
+      inset: -12px 12px 12px -12px;
+      border: 2px solid var(--gold);
+      z-index: -1;
+    }
+    .about-text p {
+      font-size: .98rem;
+      line-height: 1.85;
+      color: #444;
+      margin-bottom: 1rem;
+    }
+    .schedule-grid {
+      margin-top: 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .6rem 2rem;
+    }
+    .schedule-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: .82rem;
+      padding: .5rem 0;
+      border-bottom: 1px solid var(--mist);
+    }
+    .schedule-item .day { font-weight: 400; }
+    .schedule-item .time { color: var(--red); }
+    .schedule-item.closed .time { color: #aaa; }
+
+    /* ── MENU ── */
+    #menu { background: var(--rice); }
+    .menu-tabs {
+      display: flex; gap: 0;
+      margin-bottom: 3rem;
+      border-bottom: 1.5px solid var(--mist);
+    }
+    .tab-btn {
+      background: none; border: none;
+      font-family: var(--font-body);
+      font-size: .78rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      padding: .8rem 1.8rem;
+      cursor: none;
+      color: #999;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1.5px;
+      transition: color .2s, border-color .2s;
+    }
+    .tab-btn.active { color: var(--ink); border-color: var(--red); }
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5px;
+    }
+    .menu-card {
+      background: var(--paper);
+      padding: 2rem;
+      display: none;
+      flex-direction: column;
+      gap: .6rem;
+      transition: background .2s;
+    }
+    .menu-card.show { display: flex; }
+    .menu-card:hover { background: var(--ink); color: var(--rice); }
+    .menu-card:hover .card-price { color: var(--gold); }
+    .menu-card:hover .card-desc { color: var(--mist); }
+    .card-name {
+      font-family: var(--font-jp);
+      font-size: 1.15rem;
+      font-weight: 600;
+    }
+    .card-desc { font-size: .82rem; line-height: 1.6; color: #666; }
+    .card-price { font-size: .9rem; color: var(--red); margin-top: auto; }
+
+    /* ── GALERÍA ── */
+    #galeria {
+      background: var(--ink);
+      color: var(--paper);
+    }
+    #galeria .section-label { color: var(--gold); }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      grid-template-rows: 260px 260px;
+      gap: 6px;
+      margin-top: 3rem;
+    }
+    .gal-item {
+      overflow: hidden;
+      position: relative;
+    }
+    .gal-item:first-child { grid-row: 1 / 3; }
+    .gal-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform .6s ease, filter .4s;
+      filter: sepia(20%) contrast(1.05);
+    }
+    .gal-item:hover img { transform: scale(1.07); filter: sepia(0%) contrast(1.1); }
+
+    /* ── RESERVACIONES ── */
+    #reservaciones {
+      background: var(--paper);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: start;
+    }
+    .reserva-info p {
+      font-size: .95rem; line-height: 1.8; color: #555; margin-bottom: 1rem;
+    }
+    .contact-list { list-style: none; margin-top: 1.5rem; display: flex; flex-direction: column; gap: .8rem; }
+    .contact-list li { display: flex; align-items: center; gap: .8rem; font-size: .9rem; }
+    .contact-list .icon {
+      width: 36px; height: 36px;
+      background: var(--ink);
+      color: var(--rice);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .contact-list a { color: var(--ink); text-decoration: none; }
+    .contact-list a:hover { color: var(--red); }
+
+    .reserva-form { display: flex; flex-direction: column; gap: 1rem; }
+    .field-group { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .field { display: flex; flex-direction: column; gap: .4rem; }
+    .field label { font-size: .7rem; letter-spacing: .2em; text-transform: uppercase; color: #888; }
+    .field input, .field select, .field textarea {
+      background: transparent;
+      border: none;
+      border-bottom: 1.5px solid var(--mist);
+      padding: .6rem 0;
+      font-family: var(--font-body);
+      font-size: .92rem;
+      color: var(--ink);
+      outline: none;
+      cursor: none;
+      transition: border-color .2s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--ink);
+    }
+    .field textarea { resize: none; min-height: 80px; }
+    .form-submit {
+      margin-top: .5rem;
+    }
+
+    /* ── MAPA ── */
+    #ubicacion { padding: 0; }
+    #ubicacion iframe { display: block; width: 100%; height: 460px; border: none; filter: sepia(20%) contrast(1.05); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 4rem 5rem 2.5rem;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 4rem;
+      padding-bottom: 3rem;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      margin-bottom: 2rem;
+    }
+    .footer-brand {
+      font-family: var(--font-jp);
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: .8rem;
+    }
+    .footer-brand span { color: var(--red); }
+    .footer-tagline { font-size: .85rem; color: #888; line-height: 1.7; }
+    .footer-col h4 {
+      font-size: .68rem;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.2rem;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: .6rem; }
+    .footer-col ul li { font-size: .85rem; color: #888; }
+    .footer-col a { color: #888; text-decoration: none; transition: color .2s; }
+    .footer-col a:hover { color: var(--paper); }
+    .social-links { display: flex; gap: 1rem; margin-top: 1rem; }
+    .social-btn {
+      width: 38px; height: 38px;
+      border: 1px solid rgba(255,255,255,.2);
+      display: flex; align-items: center; justify-content: center;
+      color: #aaa;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: background .2s, color .2s;
+    }
+    .social-btn:hover { background: var(--red); color: #fff; border-color: var(--red); }
+    .footer-bottom {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: .75rem; color: #555;
+    }
+
+    /* ── WHATSAPP FLOAT ── */
+    .wa-float {
+      position: fixed;
+      bottom: 2rem; right: 2rem;
+      z-index: 200;
+      width: 56px; height: 56px;
+      background: #25d366;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none;
+      box-shadow: 0 4px 20px rgba(37,211,102,.4);
+      animation: pulse 2.5s infinite;
+      cursor: none;
+    }
+    .wa-float svg { width: 28px; height: 28px; fill: #fff; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; } to { opacity: 1; }
+    }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 4px 20px rgba(37,211,102,.4); }
+      50%      { box-shadow: 0 4px 32px rgba(37,211,102,.7); }
+    }
+
+    /* ── REVEAL ON SCROLL ── */
+    .reveal { opacity: 0; transform: translateY(40px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      #hero { grid-template-columns: 1fr; }
+      .hero-left { padding: 7rem 2rem 3rem; }
+      .hero-right { height: 50vw; }
+      section { padding: 5rem 2rem; }
+      #nosotros, #reservaciones { grid-template-columns: 1fr; gap: 3rem; }
+      .gallery-grid { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
+      .gal-item:first-child { grid-row: auto; }
+      footer { padding: 3rem 2rem 2rem; }
+      .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .footer-bottom { flex-direction: column; gap: .5rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div id="cursor"></div>
+
+<!-- WhatsApp Float -->
+<a href="https://wa.me/522251197179" target="_blank" class="wa-float" title="WhatsApp">
+  <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <path d="M16 .5C7.44.5.5 7.44.5 16c0 2.76.72 5.4 2.08 7.72L.5 31.5l8.02-2.1A15.4 15.4 0 0016 31.5C24.56 31.5 31.5 24.56 31.5 16S24.56.5 16 .5zm0 28.2a13.6 13.6 0 01-6.93-1.9l-.5-.3-5.1 1.34 1.35-4.96-.33-.53A13.5 13.5 0 012.3 16C2.3 8.44 8.44 2.3 16 2.3S29.7 8.44 29.7 16 23.56 28.7 16 28.7zm7.44-10.1c-.4-.2-2.38-1.17-2.75-1.3-.37-.14-.63-.2-.9.2-.26.4-1.02 1.3-1.25 1.57-.23.27-.46.3-.86.1-2.36-1.18-3.9-2.1-5.44-4.77-.41-.7.41-.65 1.17-2.16.13-.27.07-.5-.04-.7-.1-.2-.9-2.17-1.23-2.97-.32-.78-.65-.67-.9-.68h-.77c-.27 0-.7.1-1.06.5-.37.4-1.4 1.37-1.4 3.33s1.44 3.87 1.64 4.14c.2.27 2.83 4.32 6.86 6.06 2.56 1.1 3.56 1.2 4.84.1.78-.66 1.5-1.96 1.72-2.68.21-.72.21-1.33.15-1.46-.06-.13-.26-.2-.66-.4z"/>
+  </svg>
+</a>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">Sushi <span>Kyto</span></a>
+  <ul class="nav-links">
+    <li><a href="#nosotros">Nosotros</a></li>
+    <li><a href="#menu">Menú</a></li>
+    <li><a href="#galeria">Galería</a></li>
+    <li><a href="#reservaciones">Reservar</a></li>
+    <li><a href="#ubicacion">Ubicación</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-left">
+    <p class="hero-tag">Teziutlán, Puebla · Desde el corazón de la sierra</p>
+    <h1 class="hero-title">El arte<br>del <em>sushi</em><br>en la sierra.</h1>
+    <p class="hero-sub">Rolls artesanales, ensaladas frescas y sabores japoneses auténticos — en el corazón de Teziutlán.</p>
+    <div class="hero-cta">
+      <a href="#menu" class="btn fill">Ver Menú</a>
+      <a href="#reservaciones" class="btn">Reservar Mesa</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <img src="https://images.unsplash.com/photo-1617196034183-421b4040ed20?w=900&q=80" alt="Sushi artesanal">
+    <div class="hero-kanji">寿司</div>
+  </div>
+</section>
+
+<!-- STRIP -->
+<div class="strip">
+  <div class="strip-inner">
+    <span>Sushi Artesanal</span><span class="dot">✦</span>
+    <span>Ensaladas Frescas</span><span class="dot">✦</span>
+    <span>Rolls Especiales</span><span class="dot">✦</span>
+    <span>Teziutlán, Pue.</span><span class="dot">✦</span>
+    <span>Miércoles a Domingo</span><span class="dot">✦</span>
+    <span>Sushi Artesanal</span><span class="dot">✦</span>
+    <span>Ensaladas Frescas</span><span class="dot">✦</span>
+    <span>Rolls Especiales</span><span class="dot">✦</span>
+    <span>Teziutlán, Pue.</span><span class="dot">✦</span>
+    <span>Miércoles a Domingo</span><span class="dot">✦</span>
+  </div>
+</div>
+
+<!-- NOSOTROS -->
+<section id="nosotros">
+  <div class="about-img reveal">
+    <img src="https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=700&q=80" alt="Preparación de sushi">
+  </div>
+  <div class="about-text reveal">
+    <p class="section-label">Sobre Nosotros</p>
+    <h2 class="section-title">Tradición japonesa<br>en la montaña.</h2>
+    <p>En Sushi Kyto llevamos la cocina japonesa a Teziutlán con ingredientes frescos, técnica cuidadosa y mucho amor. Cada roll es preparado al momento para que tu experiencia sea única.</p>
+    <p>Nos encontramos en la esquina de Vicente Lombardo Toledano y Díaz Mirón, listos para recibirte con nuestro menú de sushi y ensaladas.</p>
+
+    <div class="schedule-grid">
+      <div class="schedule-item"><span class="day">Miércoles</span><span class="time">13:00 – 20:40</span></div>
+      <div class="schedule-item"><span class="day">Jueves</span><span class="time">13:00 – 20:40</span></div>
+      <div class="schedule-item"><span class="day">Viernes</span><span class="time">13:00 – 20:40</span></div>
+      <div class="schedule-item"><span class="day">Sábado</span><span class="time">13:00 – 20:40</span></div>
+      <div class="schedule-item"><span class="day">Domingo</span><span class="time">13:00 – 20:40</span></div>
+      <div class="schedule-item closed"><span class="day">Lunes</span><span class="time">Cerrado</span></div>
+      <div class="schedule-item closed"><span class="day">Martes</span><span class="time">Cerrado</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- MENU -->
+<section id="menu">
+  <div class="reveal">
+    <p class="section-label">Lo que preparamos</p>
+    <h2 class="section-title">Nuestro Menú</h2>
+  </div>
+  <div class="menu-tabs reveal">
+    <button class="tab-btn active" onclick="showTab('rolls')">Rolls</button>
+    <button class="tab-btn" onclick="showTab('nigiri')">Nigiri & Sashimi</button>
+    <button class="tab-btn" onclick="showTab('ensaladas')">Ensaladas</button>
+    <button class="tab-btn" onclick="showTab('extras')">Extras</button>
+  </div>
+  <div class="menu-grid reveal">
+    <!-- ROLLS -->
+    <div class="menu-card show" data-cat="rolls">
+      <p class="card-name">Roll California</p>
+      <p class="card-desc">Cangrejo, aguacate y pepino. El clásico de siempre.</p>
+      <p class="card-price">Consultar precio</p>
+    </div>
+    <div class="menu-card show" data-cat="rolls">
+      <p class="card-name">Roll Spicy Tuna</p>
+      <p class="card-desc">Atún fresco con salsa picante y cebollín. Para los valientes.</p>
+      <p class="card-price">Consultar precio</p>
+    </div>
+    <div class="menu-card show" data-cat="rolls">
+      <p class="card-name">Roll Kyto Especial</p>
+      <p class="card-desc">Nuestra creación estrella — ingredientes secretos y mucho sabor.</p>
+      <p class="card-price">Consultar precio</p>
+    </div>
+    <div class="menu-card show" data-cat="rolls">
+      <p class="card-name">Roll Tropical</p>
+      <p class="card-desc">Mango, camarón tempura y crema de chipotle. Dulce y picante.</p>
+      <p class="card-price">Consultar precio</p>
+    </div>
+    <div class="menu-card show" data-cat="rolls">
+      <p class="card-name">Roll Vegetariano</p>
+      <p class="card-desc">Pepino, zanahoria, aguacate y queso crema. Fresco y ligero.</p>
+      <p class="card-price">Consultar precio</p>
+    </div>
+    <div class="menu-card show" data-cat="rolls">
+      <p class="card-name">Roll Camarón Tempura</p>
+      <p class="card-desc">Camarón rebozado crujiente, aguacate y salsa eel.</p>
+      <p class="card-price">Consultar precio</p>
+    </div>
+    <!-- NIGIRI -->
+    <div class="menu-card" data-cat="nigiri">
+      <p class="card-name">Nigiri Salmón</p>
+      <p class="card-desc">Arroz de sushi con lámina de salmón fresco encima.</p>
+      <p class="card-price">Consultar precio</p>
+    </div>
+    <div class="menu-card" data-cat="nigiri">
+      <p class="card-name">Nigiri Atún</p>
+      <p class="card-desc">Arroz de sushi con atún de primera calidad.</p>
+      <p class="card-price">Consultar precio</p>
+    </div>
+    <div class="menu-card" data-cat="nigiri">
+      <p class="card-name">Sashimi Mix</p>
+      <p class="card-desc">Selección de salmón, atún y pescado blanco, sin arroz.</p>
+      <p class="card-price">Consultar precio</p>
+    </div>
+    <!-- ENSALADAS -->
+    <div class="menu-card" data-cat="ensaladas">
+      <p class="card-name">Ensalada Kyto</p>
+      <p class="card-desc">Mezclum fresco, pepino, zanahoria y aderezo de ajonjolí.</p>
+      <p class="card-price">Consultar precio</p>
+    </div>
+    <div class="menu-card" data-cat="ensaladas">
+      <p class="card-name">Ensalada Wakame</p>
+      <p class="card-desc">Alga wakame marinada con aceite de sésamo y semillas.</p>
+      <p class="card-price">Consultar precio</p>
+    </div>
+    <div class="menu-card" data-cat="ensaladas">
+      <p class="card-name">Ensalada de Camarón</p>
+      <p class="card-desc">Camarones salteados sobre cama de lechuga con aderezo oriental.</p>
+      <p class="card-price">Consultar precio</p>
+    </div>
+    <!-- EXTRAS -->
+    <div class="menu-card" data-cat="extras">
+      <p class="card-name">Miso Soup</p>
+      <p class="card-desc">Sopa tradicional japonesa con tofu y alga.</p>
+      <p class="card-price">Consultar precio</p>
+    </div>
+    <div class="menu-card" data-cat="extras">
+      <p class="card-name">Edamame</p>
+      <p class="card-desc">Vainas de soya al vapor con sal de mar. Perfecto para empezar.</p>
+      <p class="card-price">Consultar precio</p>
+    </div>
+    <div class="menu-card" data-cat="extras">
+      <p class="card-name">Naranja Japonesa</p>
+      <p class="card-desc">Bebida de naranja natural con toque de jengibre.</p>
+      <p class="card-price">Consultar precio</p>
+    </div>
+  </div>
+  <p style="margin-top:2rem;font-size:.8rem;color:#999;letter-spacing:.05em;" class="reveal">
+    * Menú de ejemplo. Visita nuestro Instagram <a href="https://instagram.com/sushikyto_teziutlan" target="_blank" style="color:var(--red);text-decoration:none;">@sushikyto_teziutlan</a> para el menú actualizado y promociones.
+  </p>
+</section>
+
+<!-- GALERÍA -->
+<section id="galeria">
+  <div class="reveal">
+    <p class="section-label">Galería</p>
+    <h2 class="section-title" style="color:var(--paper);">Una imagen<br>vale mil sabores.</h2>
+  </div>
+  <div class="gallery-grid reveal">
+    <div class="gal-item">
+      <img src="https://images.unsplash.com/photo-1562802378-063ec186a863?w=800&q=80" alt="Sushi plato">
+    </div>
+    <div class="gal-item">
+      <img src="https://images.unsplash.com/photo-1611143669185-af224c5e3252?w=500&q=80" alt="Rolls coloridos">
+    </div>
+    <div class="gal-item">
+      <img src="https://images.unsplash.com/photo-1617196034099-2ab3ccd3e60b?w=500&q=80" alt="Sashimi">
+    </div>
+    <div class="gal-item">
+      <img src="https://images.unsplash.com/photo-1559410545-0bdcd187e0a6?w=500&q=80" alt="Ensalada japonesa">
+    </div>
+    <div class="gal-item">
+      <img src="https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80" alt="Roll especial">
+    </div>
+  </div>
+</section>
+
+<!-- RESERVACIONES -->
+<section id="reservaciones">
+  <div class="reveal">
+    <p class="section-label">Reservaciones</p>
+    <h2 class="section-title">Asegura<br>tu lugar.</h2>
+    <div class="reserva-info">
+      <p>Llámanos o mándanos un mensaje para apartar tu mesa. También puedes escribirnos por WhatsApp, Instagram o Facebook.</p>
+      <ul class="contact-list">
+        <li>
+          <span class="icon">📞</span>
+          <a href="tel:+522251197179">+52 225 119 7179</a>
+        </li>
+        <li>
+          <span class="icon">💬</span>
+          <a href="https://wa.me/522251197179" target="_blank">WhatsApp</a>
+        </li>
+        <li>
+          <span class="icon">📸</span>
+          <a href="https://instagram.com/sushikyto_teziutlan" target="_blank">@sushikyto_teziutlan</a>
+        </li>
+        <li>
+          <span class="icon">📍</span>
+          <span>Díaz Mirón 306 Esq. Lombardo Toledano, Teziutlán, Pue.</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="reserva-form reveal">
+    <div class="field-group">
+      <div class="field">
+        <label>Tu nombre</label>
+        <input type="text" placeholder="Ana García">
+      </div>
+      <div class="field">
+        <label>Teléfono / WhatsApp</label>
+        <input type="tel" placeholder="+52 000 000 0000">
+      </div>
+    </div>
+    <div class="field-group">
+      <div class="field">
+        <label>Fecha</label>
+        <input type="date">
+      </div>
+      <div class="field">
+        <label>Hora</label>
+        <select>
+          <option>13:00</option><option>14:00</option><option>15:00</option>
+          <option>16:00</option><option>17:00</option><option>18:00</option>
+          <option>19:00</option><option>20:00</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Número de personas</label>
+      <select>
+        <option>1 persona</option><option>2 personas</option><option>3 personas</option>
+        <option>4 personas</option><option>5 o más personas</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Notas o peticiones especiales</label>
+      <textarea placeholder="Alergias, cumpleaños, preferencias..."></textarea>
+    </div>
+    <div class="form-submit">
+      <a href="#" class="btn fill" onclick="sendReserva(event)">Enviar por WhatsApp</a>
+    </div>
+  </div>
+</section>
+
+<!-- MAPA -->
+<div id="ubicacion">
+  <iframe
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3763.8!2d-97.3607!3d19.8126!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDQ4JzQ1LjIiTiA5N8KwMjEnMzguNSJX!5e0!3m2!1ses!2smx!4v1600000000000!5m2!1ses!2smx"
+    allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+    title="Ubicación Sushi Kyto Teziutlán">
+  </iframe>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand">Sushi <span>Kyto</span></div>
+      <p class="footer-tagline">Arte japonés en el corazón<br>de la sierra poblana.</p>
+      <div class="social-links">
+        <a href="https://instagram.com/sushikyto_teziutlan" target="_blank" class="social-btn" title="Instagram">IG</a>
+        <a href="https://wa.me/522251197179" target="_blank" class="social-btn" title="WhatsApp">WA</a>
+        <a href="https://facebook.com" target="_blank" class="social-btn" title="Facebook">FB</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Horario</h4>
+      <ul>
+        <li>Miércoles – Domingo</li>
+        <li>13:00 – 20:40 hrs</li>
+        <li style="color:#555;">Lunes y martes cerrado</li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contacto</h4>
+      <ul>
+        <li><a href="tel:+522251197179">+52 225 119 7179</a></li>
+        <li><a href="https://instagram.com/sushikyto_teziutlan" target="_blank">@sushikyto_teziutlan</a></li>
+        <li>Díaz Mirón 306, Teziutlán, Pue.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 Sushi Kyto · Teziutlán, Puebla</span>
+    <span>Hecho con 🍣 en la sierra</span>
+  </div>
+</footer>
+
+<script>
+  /* Cursor */
+  const cur = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cur.style.transform = `translate(${e.clientX - 5}px, ${e.clientY - 5}px)`;
+  });
+  document.querySelectorAll('a, button, .menu-card, .gal-item').forEach(el => {
+    el.addEventListener('mouseenter', () => cur.classList.add('big'));
+    el.addEventListener('mouseleave', () => cur.classList.remove('big'));
+  });
+
+  /* Scroll reveal */
+  const reveals = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  reveals.forEach(r => obs.observe(r));
+
+  /* Menu tabs */
+  function showTab(cat) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    document.querySelectorAll('.menu-card').forEach(c => {
+      c.classList.toggle('show', c.dataset.cat === cat);
+    });
+  }
+
+  /* Reserva WhatsApp */
+  function sendReserva(e) {
+    e.preventDefault();
+    const inputs = document.querySelectorAll('.reserva-form input, .reserva-form select, .reserva-form textarea');
+    const [nombre, tel, fecha, hora, personas, notas] = inputs;
+    const msg = `Hola Sushi Kyto 🍣%0A%0AQuiero reservar una mesa:%0A👤 Nombre: ${nombre.value || '—'}%0A📅 Fecha: ${fecha.value || '—'}%0A🕐 Hora: ${hora.value}%0A👥 Personas: ${personas.value}%0A📝 Notas: ${notas.value || 'Ninguna'}`;
+    window.open(`https://wa.me/522251197179?text=${msg}`, '_blank');
+  }
+</script>
+</body>
+</html>
